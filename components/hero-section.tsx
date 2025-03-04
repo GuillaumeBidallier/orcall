@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, MapPin, Calendar, Filter, Search } from "lucide-react";
+import { CheckCircle, MapPin, Calendar } from "lucide-react";
 import { SearchForm, SearchCriteria } from "@/components/search-form";
 import { HeroBanner } from "@/components/section/hero-banner";
 import { FeaturesSection } from "@/components/section/features-section";
