@@ -1,176 +1,217 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card, CardContent, CardDescription, CardHeader, CardTitle
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+    Dialog, DialogContent, DialogDescription, DialogFooter,
+    DialogHeader, DialogTitle
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    Tabs, TabsContent, TabsList, TabsTrigger
+} from "@/components/ui/tabs";
 import {
     Briefcase, MapPin, Calendar, Clock, Euro, Building, User,
-    Plus, Search, Filter, ArrowRight, CheckCircle, AlertCircle
+    Plus, Search, Filter, ArrowRight
 } from "lucide-react";
+
 import { trades } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/auth-context";
+
+import {
+    fetchAllMissions,
+    fetchMyMissions,
+    createMission,
+    applyToMission,
+    fetchMyApplications,
+} from "@/lib/apiMissions";
 
 interface Mission {
-    id: string;
+    id: number;
     title: string;
     description: string;
-    company: {
-        name: string;
-        logo?: string;
-    };
     trade: string;
     location: string;
-    budget: {
-        min: number;
-        max: number;
-        type: "hourly" | "fixed";
-    };
-    duration: {
-        start: string;
-        end: string;
-        type: "short" | "long";
-    };
+    budgetMin?: number;
+    budgetMax?: number;
+    budgetType?: "hourly" | "fixed";
+    startDate?: string;
+    endDate?: string;
+    durationType?: "short" | "long";
     status: "open" | "in_progress" | "completed";
-    applicants: number;
     createdAt: string;
-    requirements: string[];
+}
+
+interface Application {
+    id: number;
+    createdAt: string;
+    mission: Mission;
+    status?: string;
 }
 
 export default function MissionsPage() {
     const { toast } = useToast();
+    const { token, user } = useAuth();
+
     const [activeTab, setActiveTab] = useState("browse");
     const [showNewMissionDialog, setShowNewMissionDialog] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Filtres
     const [filters, setFilters] = useState({
-        trade: "",
+        trade: "all",
         location: "",
-        duration: "",
-        budget: "",
+        duration: "all",
+        budget: "all",
     });
 
-    const missions: Mission[] = [
-        {
-            id: "1",
-            title: "Rénovation complète d'un appartement",
-            description: "Recherche peintre qualifié pour la rénovation complète d'un appartement de 80m². Travaux incluant la préparation des surfaces, peinture des murs et plafonds, et finitions.",
-            company: {
-                name: "Rénovation Plus",
-                logo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3",
-            },
-            trade: "peintre",
-            location: "Paris 11e",
-            budget: {
-                min: 2500,
-                max: 3500,
-                type: "fixed",
-            },
-            duration: {
-                start: "2024-04-01",
-                end: "2024-04-15",
-                type: "short",
-            },
-            status: "open",
-            applicants: 3,
-            createdAt: "2024-03-15",
-            requirements: [
-                "5 ans d'expérience minimum",
-                "Spécialisation en peinture décorative",
-                "Disponible immédiatement",
-            ],
-        },
-        {
-            id: "2",
-            title: "Chantier de construction neuve",
-            description: "Recherche maçon expérimenté pour un chantier de construction d'une maison individuelle. Travaux de fondation, élévation des murs, et finitions.",
-            company: {
-                name: "Constructions Modernes",
-                logo: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3",
-            },
-            trade: "macon",
-            location: "Lyon",
-            budget: {
-                min: 45,
-                max: 55,
-                type: "hourly",
-            },
-            duration: {
-                start: "2024-04-15",
-                end: "2024-07-15",
-                type: "long",
-            },
-            status: "open",
-            applicants: 5,
-            createdAt: "2024-03-14",
-            requirements: [
-                "10 ans d'expérience",
-                "Permis de conduire obligatoire",
-                "Habilitations à jour",
-            ],
-        },
-    ];
+    // États pour stocker les missions
+    const [missions, setMissions] = useState<Mission[]>([]);
+    const [myMissions, setMyMissions] = useState<Mission[]>([]);
 
-    const myMissions: Mission[] = [
-        {
-            id: "3",
-            title: "Rénovation salle de bain",
-            description: "Rénovation complète d'une salle de bain incluant peinture, carrelage et petite plomberie.",
-            company: {
-                name: "Particulier - M. Dubois",
-            },
-            trade: "peintre",
-            location: "Paris 15e",
-            budget: {
-                min: 2000,
-                max: 2500,
-                type: "fixed",
-            },
-            duration: {
-                start: "2024-04-10",
-                end: "2024-04-20",
-                type: "short",
-            },
-            status: "in_progress",
-            applicants: 4,
-            createdAt: "2024-03-10",
-            requirements: [
-                "Expérience en rénovation",
-                "Disponible en semaine",
-            ],
+    // États pour stocker les candidatures (en cours)
+    const [myApplications, setMyApplications] = useState<Application[]>([]);
+
+    // Formulaire de création de mission
+    const [title, setTitle] = useState("");
+    const [missionTrade, setMissionTrade] = useState("");
+    const [description, setDescription] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [budgetType, setBudgetType] = useState<"" | "fixed" | "hourly">("");
+    const [budget, setBudget] = useState("");
+    const [location, setLocation] = useState("");
+    const [durationType, setDurationType] = useState<"" | "short" | "long">("");
+
+    // Charger toutes les missions (pour l'onglet "browse")
+    useEffect(() => {
+        (async () => {
+            try {
+                const all = await fetchAllMissions();  // A adapter
+                setMissions(all.missions || []);
+            } catch (error: any) {
+                console.error(error);
+            }
+        })();
+    }, []);
+
+    // Charger "mes missions" et "mes candidatures" si l'utilisateur est connecté
+    useEffect(() => {
+        if (token) {
+            (async () => {
+                try {
+                    const mine = await fetchMyMissions(token);
+                    setMyMissions(mine.missions || []);
+                } catch (error: any) {
+                    console.error(error);
+                }
+            })();
+
+            (async () => {
+                try {
+                    const apps = await fetchMyApplications(token);
+                    setMyApplications(apps.applications || []);
+                } catch (error: any) {
+                    console.error(error);
+                }
+            })();
         }
-    ];
+    }, [token]);
 
-    const handleApply = (missionId: string) => {
+    // Postuler à une mission
+    const handleApply = async (missionId: number) => {
+        if (!token) {
+            toast({ title: "Erreur", description: "Vous devez être connecté pour postuler." });
+            return;
+        }
+        if (!user || !user.userType?.toLowerCase().includes("professionnel")) {
+            toast({ title: "Interdit", description: "Seuls les professionnels peuvent postuler." });
+            return;
+        }
         setIsSubmitting(true);
-
-        setTimeout(() => {
-            toast({
-                title: "Candidature envoyée",
-                description: "Votre candidature a été envoyée avec succès.",
-            });
+        try {
+            const result = await applyToMission(missionId, token);
+            if (result?.application) {
+                toast({
+                    title: "Candidature envoyée",
+                    description: "Votre candidature a été envoyée avec succès.",
+                });
+                // Option : recharger la liste des candidatures
+                const apps = await fetchMyApplications(token);
+                setMyApplications(apps.applications || []);
+            } else {
+                toast({ title: "Erreur", description: result?.message || "Une erreur est survenue." });
+            }
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Erreur", description: "Impossible de postuler pour le moment." });
+        } finally {
             setIsSubmitting(false);
-        }, 1000);
+        }
     };
 
-    const handlePublishMission = (e: React.FormEvent) => {
+    // Publier une mission
+    const handlePublishMission = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!token) {
+            toast({ title: "Erreur", description: "Vous devez être connecté pour publier une mission." });
+            return;
+        }
         setIsSubmitting(true);
-
-        setTimeout(() => {
-            toast({
-                title: "Mission publiée",
-                description: "Votre mission a été publiée avec succès.",
-            });
+        try {
+            const payload = {
+                title,
+                description,
+                trade: missionTrade,
+                location,
+                budgetMin: budgetType ? budget : null,
+                budgetMax: budgetType ? budget : null,
+                budgetType,
+                startDate,
+                endDate,
+                durationType,
+            };
+            const result = await createMission(payload, token);
+            if (result?.mission) {
+                toast({
+                    title: "Mission publiée",
+                    description: "Votre mission a été publiée avec succès.",
+                });
+                // Ajouter la mission dans "myMissions"
+                setMyMissions((prev) => [...prev, result.mission]);
+                // Réinitialiser le formulaire
+                setShowNewMissionDialog(false);
+                setTitle("");
+                setDescription("");
+                setMissionTrade("");
+                setBudget("");
+                setBudgetType("");
+                setLocation("");
+                setStartDate("");
+                setEndDate("");
+                setDurationType("");
+            } else {
+                toast({
+                    title: "Erreur",
+                    description: result?.message || "Une erreur est survenue lors de la publication.",
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Erreur", description: "Impossible de publier la mission." });
+        } finally {
             setIsSubmitting(false);
-            setShowNewMissionDialog(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -213,6 +254,7 @@ export default function MissionsPage() {
                         </TabsTrigger>
                     </TabsList>
 
+                    {/* ========================= Onglet : Toutes les missions ========================= */}
                     <TabsContent value="browse">
                         <Card className="mb-6">
                             <CardHeader>
@@ -223,6 +265,7 @@ export default function MissionsPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    {/* Filtre : Métier */}
                                     <div>
                                         <Label>Métier</Label>
                                         <Select
@@ -234,15 +277,16 @@ export default function MissionsPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="all">Tous les métiers</SelectItem>
-                                                {trades.map((trade) => (
-                                                    <SelectItem key={trade.id} value={trade.id}>
-                                                        {trade.name}
+                                                {trades.map((t) => (
+                                                    <SelectItem key={t.id} value={t.id}>
+                                                        {t.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
 
+                                    {/* Filtre : Localisation */}
                                     <div>
                                         <Label>Localisation</Label>
                                         <Input
@@ -252,6 +296,7 @@ export default function MissionsPage() {
                                         />
                                     </div>
 
+                                    {/* Filtre : Durée */}
                                     <div>
                                         <Label>Durée</Label>
                                         <Select
@@ -269,6 +314,7 @@ export default function MissionsPage() {
                                         </Select>
                                     </div>
 
+                                    {/* Filtre : Budget */}
                                     <div>
                                         <Label>Budget</Label>
                                         <Select
@@ -290,6 +336,7 @@ export default function MissionsPage() {
                             </CardContent>
                         </Card>
 
+                        {/* Liste des missions (depuis l'API) */}
                         <div className="grid grid-cols-1 gap-6">
                             {missions.map((mission) => (
                                 <Card key={mission.id} className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -297,20 +344,15 @@ export default function MissionsPage() {
                                         <div className="flex flex-col md:flex-row justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-start">
-                                                    {mission.company.logo && (
-                                                        <div className="w-12 h-12 rounded-lg overflow-hidden mr-4 flex-shrink-0">
-                                                            <img
-                                                                src={mission.company.logo}
-                                                                alt={mission.company.name}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        </div>
-                                                    )}
+                                                    <div className="w-12 h-12 rounded-lg overflow-hidden mr-4 flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                                                        <Building className="w-6 h-6 text-gray-500" />
+                                                    </div>
                                                     <div>
                                                         <h3 className="text-xl font-semibold mb-2">{mission.title}</h3>
                                                         <div className="flex items-center text-gray-600 text-sm mb-2">
                                                             <Building className="w-4 h-4 mr-1" />
-                                                            {mission.company.name}
+                                                            {/* Optionnel : Nom du posteur si vous l'avez */}
+                                                            {mission.location || "Localisation inconnue"}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -325,35 +367,41 @@ export default function MissionsPage() {
                                                     <div className="flex items-center">
                                                         <Calendar className="w-4 h-4 text-gray-500 mr-2" />
                                                         <span className="text-sm">
-                              {new Date(mission.duration.start).toLocaleDateString()} - {new Date(mission.duration.end).toLocaleDateString()}
+                              {mission.startDate
+                                  ? new Date(mission.startDate).toLocaleDateString()
+                                  : "Début n/c"}{" "}
+                                                            -{" "}
+                                                            {mission.endDate
+                                                                ? new Date(mission.endDate).toLocaleDateString()
+                                                                : "Fin n/c"}
                             </span>
                                                     </div>
                                                     <div className="flex items-center">
                                                         <Clock className="w-4 h-4 text-gray-500 mr-2" />
                                                         <span className="text-sm">
-                              {mission.duration.type === "short" ? "Mission courte" : "Mission longue"}
+                              {mission.durationType === "short"
+                                  ? "Mission courte"
+                                  : mission.durationType === "long"
+                                      ? "Mission longue"
+                                      : "Durée inconnue"}
                             </span>
                                                     </div>
                                                     <div className="flex items-center">
                                                         <Euro className="w-4 h-4 text-gray-500 mr-2" />
                                                         <span className="text-sm">
-                              {mission.budget.type === "fixed"
-                                  ? `${mission.budget.min}€ - ${mission.budget.max}€`
-                                  : `${mission.budget.min}€/h - ${mission.budget.max}€/h`
-                              }
+                              {mission.budgetType === "fixed"
+                                  ? `${mission.budgetMin}€ - ${mission.budgetMax}€`
+                                  : mission.budgetType === "hourly"
+                                      ? `${mission.budgetMin}€/h - ${mission.budgetMax}€/h`
+                                      : "Budget non renseigné"}
                             </span>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2 mb-4">
                                                     <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                                                        {trades.find(t => t.id === mission.trade)?.name || mission.trade}
+                                                        {trades.find((t) => t.id === mission.trade)?.name || mission.trade}
                                                     </Badge>
-                                                    {mission.requirements.map((req, index) => (
-                                                        <Badge key={index} variant="outline">
-                                                            {req}
-                                                        </Badge>
-                                                    ))}
                                                 </div>
                                             </div>
 
@@ -361,19 +409,18 @@ export default function MissionsPage() {
                                                 <div className="text-sm text-gray-500 mb-4">
                                                     Publiée le {new Date(mission.createdAt).toLocaleDateString()}
                                                 </div>
-                                                <div className="space-y-4">
-                                                    <div className="text-sm text-gray-600">
-                                                        {mission.applicants} candidat{mission.applicants > 1 ? 's' : ''}
-                                                    </div>
-                                                    <Button
-                                                        className="w-full md:w-auto bg-orange-500 hover:bg-orange-600"
-                                                        onClick={() => handleApply(mission.id)}
-                                                        disabled={isSubmitting}
-                                                    >
-                                                        {isSubmitting ? "Envoi..." : "Postuler"}
-                                                        <ArrowRight className="w-4 h-4 ml-2" />
-                                                    </Button>
-                                                </div>
+                                                {/* Bouton "Postuler" si userType = pro et mission ouverte */}
+                                                {user?.userType?.toLowerCase().includes("professionnel") &&
+                                                    mission.status === "open" && (
+                                                        <Button
+                                                            className="w-full md:w-auto bg-orange-500 hover:bg-orange-600"
+                                                            onClick={() => handleApply(mission.id)}
+                                                            disabled={isSubmitting}
+                                                        >
+                                                            {isSubmitting ? "Envoi..." : "Postuler"}
+                                                            <ArrowRight className="w-4 h-4 ml-2" />
+                                                        </Button>
+                                                    )}
                                             </div>
                                         </div>
                                     </CardContent>
@@ -382,6 +429,7 @@ export default function MissionsPage() {
                         </div>
                     </TabsContent>
 
+                    {/* ========================= Onglet : Mes missions ========================= */}
                     <TabsContent value="my-missions">
                         <Card>
                             <CardHeader>
@@ -391,126 +439,141 @@ export default function MissionsPage() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-lg font-semibold">Mission en cours</h3>
-                                        <Badge className="bg-blue-500">En cours</Badge>
-                                    </div>
+                                {!token ? (
+                                    <p className="text-gray-500">Veuillez vous connecter pour voir vos missions.</p>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {/* ---------------------------
+                        Mes missions publiées
+                    --------------------------- */}
+                                        <h3 className="text-lg font-semibold">Missions publiées</h3>
+                                        {myMissions.length === 0 ? (
+                                            <div>Aucune mission trouvée.</div>
+                                        ) : (
+                                            myMissions.map((m) => (
+                                                <Card key={m.id}>
+                                                    <CardContent className="p-6">
+                                                        <div className="flex flex-col md:flex-row justify-between">
+                                                            <div className="flex-1">
+                                                                <div className="flex items-start">
+                                                                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mr-4 flex-shrink-0">
+                                                                        <User className="w-6 h-6 text-gray-600" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <h3 className="text-xl font-semibold mb-2">{m.title}</h3>
+                                                                        <div className="flex items-center text-gray-600 text-sm mb-2">
+                                                                            <Building className="w-4 h-4 mr-1" />
+                                                                            {m.location}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                                    <Card>
-                                        <CardContent className="p-6">
-                                            <div className="flex flex-col md:flex-row justify-between">
-                                                <div className="flex-1">
-                                                    <div className="flex items-start">
-                                                        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mr-4 flex-shrink-0">
-                                                            <User className="w-6 h-6 text-gray-600" />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-xl font-semibold mb-2">{myMissions[0].title}</h3>
-                                                            <div className="flex items-center text-gray-600 text-sm mb-2">
-                                                                <Building className="w-4 h-4 mr-1" />
-                                                                {myMissions[0].company.name}
+                                                                <p className="text-gray-600 mb-4">{m.description}</p>
+
+                                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                                                    <div className="flex items-center">
+                                                                        <MapPin className="w-4 h-4 text-gray-500 mr-2" />
+                                                                        <span className="text-sm">{m.location}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center">
+                                                                        <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+                                                                        <span className="text-sm">
+                                      {m.startDate
+                                          ? new Date(m.startDate).toLocaleDateString()
+                                          : ""}{" "}
+                                                                            -{" "}
+                                                                            {m.endDate
+                                                                                ? new Date(m.endDate).toLocaleDateString()
+                                                                                : ""}
+                                    </span>
+                                                                    </div>
+                                                                    <div className="flex items-center">
+                                                                        <Clock className="w-4 h-4 text-gray-500 mr-2" />
+                                                                        <span className="text-sm">
+                                      {m.durationType === "short"
+                                          ? "Mission courte"
+                                          : m.durationType === "long"
+                                              ? "Mission longue"
+                                              : ""}
+                                    </span>
+                                                                    </div>
+                                                                    <div className="flex items-center">
+                                                                        <Euro className="w-4 h-4 text-gray-500 mr-2" />
+                                                                        <span className="text-sm">
+                                      {m.budgetType === "fixed"
+                                          ? `${m.budgetMin}€ - ${m.budgetMax}€`
+                                          : m.budgetType === "hourly"
+                                              ? `${m.budgetMin}€/h - ${m.budgetMax}€/h`
+                                              : ""}
+                                    </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="mt-4 md:mt-0 md:ml-6 flex flex-col items-end justify-between">
+                                                                <div className="text-sm text-gray-500 mb-4">
+                                                                    Publiée le {new Date(m.createdAt).toLocaleDateString()}
+                                                                </div>
+                                                                {m.status === "open" && (
+                                                                    <Button variant="outline" className="w-full md:w-auto">
+                                                                        Voir les candidats
+                                                                    </Button>
+                                                                )}
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))
+                                        )}
 
-                                                    <p className="text-gray-600 mb-4">{myMissions[0].description}</p>
+                                        {/* ---------------------------
+                        Candidatures en cours
+                    --------------------------- */}
+                                        <div className="flex items-center justify-between mt-8">
+                                            <h3 className="text-lg font-semibold">Candidatures en cours</h3>
+                                            <Badge variant="outline" className="bg-gray-100">
+                                                {myApplications.length} candidature
+                                                {myApplications.length > 1 ? "s" : ""}
+                                            </Badge>
+                                        </div>
 
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                                        <div className="flex items-center">
-                                                            <MapPin className="w-4 h-4 text-gray-500 mr-2" />
-                                                            <span className="text-sm">{myMissions[0].location}</span>
-                                                        </div>
-                                                        <div className="flex items-center">
-                                                            <Calendar className="w-4 h-4 text-gray-500 mr-2" />
-                                                            <span className="text-sm">
-                                {new Date(myMissions[0].duration.start).toLocaleDateString()} - {new Date(myMissions[0].duration.end).toLocaleDateString()}
-                              </span>
-                                                        </div>
-                                                        <div className="flex items-center">
-                                                            <Clock className="w-4 h-4 text-gray-500 mr-2" />
-                                                            <span className="text-sm">
-                                {myMissions[0].duration.type === "short" ? "Mission courte" : "Mission longue"}
-                              </span>
-                                                        </div>
-                                                        <div className="flex items-center">
-                                                            <Euro className="w-4 h-4 text-gray-500 mr-2" />
-                                                            <span className="text-sm">
-                                {myMissions[0].budget.type === "fixed"
-                                    ? `${myMissions[0].budget.min}€ - ${myMissions[0].budget.max}€`
-                                    : `${myMissions[0].budget.min}€/h - ${myMissions[0].budget.max}€/h`
-                                }
-                              </span>
-                                                        </div>
-                                                    </div>
+                                        {myApplications.length === 0 && (
+                                            <div className="text-gray-600">Aucune candidature en cours.</div>
+                                        )}
 
-                                                    <div className="flex flex-wrap gap-2 mb-4">
-                                                        <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                                                            {trades.find(t => t.id === myMissions[0].trade)?.name || myMissions[0].trade}
+                                        {myApplications.map((app) => (
+                                            <Card key={app.id}>
+                                                <CardContent className="p-6">
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <h4 className="font-semibold mb-2">{app.mission.title}</h4>
+                                                            <p className="text-sm text-gray-600 mb-2">
+                                                                {/* Ex.: Nom de l'entreprise ou particulier */}
+                                                                {/* Vous pouvez ajouter plus d'infos si vous avez `app.mission.postedByUser` */}
+                                                                {"Particulier ou Entreprise (à adapter)"}
+                                                            </p>
+                                                            <div className="flex items-center text-sm text-gray-500">
+                                                                <Calendar className="w-4 h-4 mr-1" />
+                                                                Candidature envoyée le{" "}
+                                                                {new Date(app.createdAt).toLocaleDateString()}
+                                                            </div>
+                                                        </div>
+                                                        <Badge variant="secondary">
+                                                            {/* Selon votre logique de DB : "En attente", "En cours", etc. */}
+                                                            {app.status || "En attente"}
                                                         </Badge>
-                                                        {myMissions[0].requirements.map((req, index) => (
-                                                            <Badge key={index} variant="outline">
-                                                                {req}
-                                                            </Badge>
-                                                        ))}
                                                     </div>
-
-                                                    <div className="mt-6 space-y-4">
-                                                        <div className="flex items-center text-sm text-gray-600">
-                                                            <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                                                            Mission acceptée le {new Date().toLocaleDateString()}
-                                                        </div>
-                                                        <div className="flex items-center text-sm text-gray-600">
-                                                            <AlertCircle className="w-4 h-4 text-blue-500 mr-2" />
-                                                            Début des travaux dans {Math.ceil((new Date(myMissions[0].duration.start).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} jours
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-4 md:mt-0 md:ml-6 flex flex-col items-end justify-between">
-                                                    <div className="text-sm text-gray-500 mb-4">
-                                                        Mission obtenue le {new Date(myMissions[0].createdAt).toLocaleDateString()}
-                                                    </div>
-                                                    <Button
-                                                        variant="outline"
-                                                        className="w-full md:w-auto"
-                                                    >
-                                                        Contacter le client
-                                                        <ArrowRight className="w-4 h-4 ml-2" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-
-                                    <div className="flex items-center justify-between mt-8">
-                                        <h3 className="text-lg font-semibold">Candidatures en cours</h3>
-                                        <Badge variant="outline" className="bg-gray-100">
-                                            2 candidatures
-                                        </Badge>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
                                     </div>
-
-                                    <Card>
-                                        <CardContent className="p-6">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h4 className="font-semibold mb-2">Rénovation cuisine</h4>
-                                                    <p className="text-sm text-gray-600 mb-2">Particulier - Mme Martin</p>
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <Calendar className="w-4 h-4 mr-1" />
-                                                        Candidature envoyée le {new Date().toLocaleDateString()}
-                                                    </div>
-                                                </div>
-                                                <Badge variant="secondary">En attente</Badge>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>
                 </Tabs>
 
+                {/* ========================= Popup de création de mission ========================= */}
                 <Dialog open={showNewMissionDialog} onOpenChange={setShowNewMissionDialog}>
                     <DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
@@ -527,20 +590,26 @@ export default function MissionsPage() {
                                     <Input
                                         id="title"
                                         placeholder="Ex: Rénovation complète d'un appartement"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
                                         required
                                     />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="trade">Métier recherché</Label>
-                                    <Select required>
+                                    <Label>Métier recherché</Label>
+                                    <Select
+                                        value={missionTrade}
+                                        onValueChange={(val) => setMissionTrade(val)}
+                                        required
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Sélectionnez un métier" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {trades.map((trade) => (
-                                                <SelectItem key={trade.id} value={trade.id}>
-                                                    {trade.name}
+                                            {trades.map((t) => (
+                                                <SelectItem key={t.id} value={t.id}>
+                                                    {t.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -553,6 +622,8 @@ export default function MissionsPage() {
                                         id="description"
                                         placeholder="Décrivez les tâches à réaliser, les compétences requises..."
                                         className="min-h-[100px]"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
                                         required
                                     />
                                 </div>
@@ -560,18 +631,34 @@ export default function MissionsPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="start-date">Date de début</Label>
-                                        <Input type="date" id="start-date" required />
+                                        <Input
+                                            type="date"
+                                            id="start-date"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            required
+                                        />
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="end-date">Date de fin</Label>
-                                        <Input type="date" id="end-date" required />
+                                        <Input
+                                            type="date"
+                                            id="end-date"
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            required
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="budget-type">Type de budget</Label>
-                                        <Select required>
+                                        <Label>Type de budget</Label>
+                                        <Select
+                                            value={budgetType}
+                                            onValueChange={(val) => setBudgetType(val as "fixed" | "hourly")}
+                                            required
+                                        >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Sélectionnez" />
                                             </SelectTrigger>
@@ -587,6 +674,8 @@ export default function MissionsPage() {
                                             type="number"
                                             id="budget"
                                             placeholder="Montant en €"
+                                            value={budget}
+                                            onChange={(e) => setBudget(e.target.value)}
                                             required
                                         />
                                     </div>
@@ -597,8 +686,26 @@ export default function MissionsPage() {
                                     <Input
                                         id="location"
                                         placeholder="Ville ou région"
+                                        value={location}
+                                        onChange={(e) => setLocation(e.target.value)}
                                         required
                                     />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label>Type de mission</Label>
+                                    <Select
+                                        value={durationType}
+                                        onValueChange={(val) => setDurationType(val as "short" | "long")}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Courte ou longue ?" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="short">Mission courte</SelectItem>
+                                            <SelectItem value="long">Mission longue</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
 
