@@ -21,7 +21,7 @@ import {
   ChevronDown,
   User,
   RefreshCw,
-  Search,
+  Search, Briefcase,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { trades } from "@/lib/data";
@@ -89,6 +89,15 @@ const Navbar: React.FC = () => {
               }`}
             >
               Tarifs
+            </Link>
+            <Link
+                href="/mission"
+                className={`text-sm font-medium transition-colors hover:text-orange-500 flex items-center ${
+                    pathname === "/missions" ? "text-orange-500" : "text-gray-600"
+                }`}
+            >
+              <Briefcase className="w-4 h-4 inline mr-1" />
+              Nos missions
             </Link>
             <Link
               href="/search"
