@@ -50,7 +50,7 @@ const UpdateAvailabilityDialog: React.FC<UpdateAvailabilityDialogProps> = ({
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(
+         new Error(
           data.message || "Erreur lors de la mise à jour du statut",
         );
       }

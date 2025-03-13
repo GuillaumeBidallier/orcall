@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -22,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Form,
@@ -44,7 +44,6 @@ import {
   Calendar,
   Upload,
   LogOut,
-  AlertCircle,
 } from "lucide-react";
 import { departments, trades } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
@@ -146,6 +145,9 @@ const AccountForm: React.FC = () => {
       companyName: user.companyName || "",
       companyAddress: user.companyAddress || "",
       siret: user.siret || "",
+      companyCity: user.companyCity || "",
+      companyZipCode: user.companyZipCode || "",
+      companyPhone: user.companyPhone || "",
     },
   });
 
@@ -987,15 +989,17 @@ const AccountForm: React.FC = () => {
                     </h3>
                     {user.banner ? (
                       <div className="relative w-full h-48">
-                        <img
+                        <Image
                           src={user.banner}
                           alt="Bannière de profil"
+                          width={1200}
+                          height={400}
                           className="w-full h-full object-cover rounded-lg"
                         />
                       </div>
                     ) : (
                       <p className="text-sm text-gray-500 mb-2">
-                        Vous n'avez pas encore de bannière.
+                        Vous n&#39;avez pas encore de bannière.
                       </p>
                     )}
 
@@ -1026,9 +1030,11 @@ const AccountForm: React.FC = () => {
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {user.images?.map((image: any, index: number) => (
                       <div key={index} className="relative group">
-                        <img
+                        <Image
                           src={image.url}
                           alt={`Réalisation ${index + 1}`}
+                          width={400}
+                          height={192}
                           className="w-full h-48 object-cover rounded-lg"
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
@@ -1160,7 +1166,7 @@ const AccountForm: React.FC = () => {
                                     </FormLabel>
                                     <FormDescription>
                                       Indiquez si vous acceptez des missions de
-                                      courte durée (moins d'une semaine)
+                                      courte durée (moins d&#39;une semaine)
                                     </FormDescription>
                                   </div>
                                   <FormControl>
@@ -1183,7 +1189,7 @@ const AccountForm: React.FC = () => {
                                     </FormLabel>
                                     <FormDescription>
                                       Indiquez si vous acceptez des missions de
-                                      longue durée (plus d'une semaine)
+                                      longue durée (plus d&#39;une semaine)
                                     </FormDescription>
                                   </div>
                                   <FormControl>
@@ -1338,7 +1344,7 @@ const AccountForm: React.FC = () => {
                         name="companyName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nom de l'entreprise</FormLabel>
+                            <FormLabel>Nom de l&#39;entreprise</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Nom de l'entreprise"
@@ -1354,7 +1360,7 @@ const AccountForm: React.FC = () => {
                         name="companyAddress"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Adresse de l'entreprise</FormLabel>
+                            <FormLabel>Adresse de l&#39;entreprise</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Adresse de l'entreprise"
@@ -1438,19 +1444,21 @@ const AccountForm: React.FC = () => {
                   {/* Upload du logo d'entreprise */}
                   <div className="mt-8">
                     <h3 className="text-lg font-medium mb-2">
-                      Logo de l'entreprise
+                      Logo de l&#39;entreprise
                     </h3>
                     {user.companyLogo ? (
                       <div className="relative w-40 h-40">
-                        <img
+                        <Image
                           src={user.companyLogo}
                           alt="Logo entreprise"
+                          width={200}
+                          height={200}
                           className="object-cover w-full h-full rounded"
                         />
                       </div>
                     ) : (
                       <p className="text-sm text-gray-500 mb-2">
-                        Vous n'avez pas encore de logo
+                        Vous n&#39;avez pas encore de logo
                       </p>
                     )}
 

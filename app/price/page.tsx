@@ -44,7 +44,8 @@ export default function TarifsPage() {
               <span className="text-sm text-gray-500"> /mois</span>
             </div>
             <CardDescription className="mt-2 text-base">
-              Économisez jusqu'à 300€/mois en évitant les frais d'intérim !
+              Économisez jusqu&#39;à 300€/mois en évitant les frais
+              d&#39;intérim !
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-grow pt-6">
@@ -59,13 +60,14 @@ export default function TarifsPage() {
               <li className="flex items-start">
                 <Check className="w-5 h-5 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
                 <span>
-                  Recherche simplifiée des peintres disponibles en un clin d'œil
+                  Recherche simplifiée des peintres disponibles en un clin
+                  d&#39;œil
                 </span>
               </li>
               <li className="flex items-start">
                 <Check className="w-5 h-5 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
                 <span>
-                  Économies substantielles en remplaçant l'intérim par de la
+                  Économies substantielles en remplaçant l&#39;intérim par de la
                   sous-traitance directe
                 </span>
               </li>
@@ -87,7 +89,7 @@ export default function TarifsPage() {
           <CardFooter>
             <Button className="w-full bg-blue-500 hover:bg-blue-600 py-6 text-white">
               <Building className="w-5 h-5 mr-2" />
-              S'inscrire en tant qu'Entreprise
+              S&#39;inscrire en tant qu&#39;Entreprise
             </Button>
           </CardFooter>
         </Card>
@@ -113,7 +115,7 @@ export default function TarifsPage() {
             <ul className="space-y-3">
               <li className="flex items-start">
                 <Check className="w-5 h-5 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
-                <span>Création d'un portfolio personnalisé</span>
+                <span>Création d&#39;un portfolio personnalisé</span>
               </li>
               <li className="flex items-start">
                 <Check className="w-5 h-5 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
@@ -146,7 +148,7 @@ export default function TarifsPage() {
           <CardFooter>
             <Button className="w-full bg-orange-500 hover:bg-orange-600 py-6 text-white">
               <User className="w-5 h-5 mr-2" />
-              S'inscrire gratuitement
+              S&#39;inscrire gratuitement
             </Button>
           </CardFooter>
         </Card>
@@ -164,7 +166,7 @@ export default function TarifsPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Aucune commission</h3>
             <p className="text-gray-600">
-              Nous croyons que votre travail mérite d'être rémunéré
+              Nous croyons que votre travail mérite d&#39;être rémunéré
               équitablement. Vous gardez 100% de vos revenus.
             </p>
           </div>
@@ -174,8 +176,8 @@ export default function TarifsPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Pas de frais cachés</h3>
             <p className="text-gray-600">
-              Tout est clair, tout est inclus dans l'abonnement ou l'inscription
-              gratuite. Aucune surprise.
+              Tout est clair, tout est inclus dans l&#39;abonnement ou
+              l&#39;inscription gratuite. Aucune surprise.
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -199,18 +201,18 @@ export default function TarifsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold mb-3">
-              Économisez de l'argent et gagnez du temps
+              Économisez de l&#39;argent et gagnez du temps
             </h3>
             <p className="text-gray-600">
-              Évitez les agences d'intérim et choisissez des partenariats
+              Évitez les agences d&#39;intérim et choisissez des partenariats
               directement avec des professionnels de la peinture.
             </p>
           </div>
           <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold mb-3">Soyez plus flexible</h3>
             <p className="text-gray-600">
-              Trouvez des renforts rapidement sans les contraintes de l'intérim
-              traditionnel.
+              Trouvez des renforts rapidement sans les contraintes de
+              l&#39;intérim traditionnel.
             </p>
           </div>
           <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
@@ -230,7 +232,7 @@ export default function TarifsPage() {
         <p className="text-lg mb-8 max-w-2xl mx-auto">
           Que vous soyez une entreprise à la recherche de talents ou
           professionnel indépendant cherchant des missions, Orcall est la
-          plateforme qu'il vous faut.
+          plateforme qu&#39;il vous faut.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button
@@ -238,7 +240,7 @@ export default function TarifsPage() {
             className="bg-blue-600 hover:bg-blue-700 text-white py-6 px-8"
           >
             <Building className="w-5 h-5 mr-2" />
-            S'inscrire en tant qu'Entreprise
+            S&#39;inscrire en tant qu&#39;Entreprise
           </Button>
           <Button
             size="lg"
@@ -258,13 +260,13 @@ export default function TarifsPage() {
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="border border-gray-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-2">
-              Comment fonctionne l'abonnement pour les entreprises ?
+              Comment fonctionne l&#39;abonnement pour les entreprises ?
             </h3>
             <p className="text-gray-600">
-              L'abonnement est mensuel, sans engagement. Vous pouvez l'annuler à
-              tout moment. Il vous donne accès à toutes les fonctionnalités de
-              la plateforme pour trouver des professionnels indépendants
-              qualifiés.
+              L&#39;abonnement est mensuel, sans engagement. Vous pouvez
+              l&#39;annuler à tout moment. Il vous donne accès à toutes les
+              fonctionnalités de la plateforme pour trouver des professionnels
+              indépendants qualifiés.
             </p>
           </div>
           <div className="border border-gray-200 rounded-lg p-6">
@@ -272,9 +274,9 @@ export default function TarifsPage() {
               Est-ce vraiment gratuit pour les professionnels indépendants ?
             </h3>
             <p className="text-gray-600">
-              Oui, l'inscription est totalement gratuite pour les professionnels
-              indépendants. Nous ne prenons aucune commission sur vos missions,
-              vous gardez 100% de vos revenus.
+              Oui, l&#39;inscription est totalement gratuite pour les
+              professionnels indépendants. Nous ne prenons aucune commission sur
+              vos missions, vous gardez 100% de vos revenus.
             </p>
           </div>
           <div className="border border-gray-200 rounded-lg p-6">
@@ -282,9 +284,9 @@ export default function TarifsPage() {
               Comment sont vérifiés les professionnels sur la plateforme ?
             </h3>
             <p className="text-gray-600">
-              Nous vérifions l'identité, les qualifications et les assurances
-              professionnelles de chaque professionnel indépendant avant de
-              valider leur profil sur notre plateforme.
+              Nous vérifions l&#39;identité, les qualifications et les
+              assurances professionnelles de chaque professionnel indépendant
+              avant de valider leur profil sur notre plateforme.
             </p>
           </div>
         </div>

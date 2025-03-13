@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Paintbrush,
   LogOut,
   Menu,
   X,
@@ -22,6 +21,7 @@ import {
   User,
   RefreshCw,
   Search,
+  Briefcase,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { trades } from "@/lib/data";
@@ -47,12 +47,12 @@ const Navbar: React.FC = () => {
   // État pour suivre l'erreur de chargement de l'image
   const [hasError, setHasError] = useState(false);
 
-  // Si une erreur survient, on affiche un div avec les initiales "OC"
+  // Si une erreur survient, on affiche un div avec les initiales "OC".
   if (hasError) {
     return (
-        <div className="w-16 h-16 flex items-center justify-center bg-gray-200 text-xl font-bold">
-          OC
-        </div>
+      <div className="w-16 h-16 flex items-center justify-center bg-gray-200 text-xl font-bold">
+        OC
+      </div>
     );
   }
 
@@ -63,11 +63,11 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <Image
-                src="/img/orcall-logo.png"
-                alt="Logo Orcall"
-                width={64}
-                height={64}
-                onError={() => setHasError(true)}
+              src="/img/orcall-logo.png"
+              alt="Logo Orcall"
+              width={64}
+              height={64}
+              onError={() => setHasError(true)}
             />
             <span className="text-2xl font-bold text-orange-500">Orcall</span>
           </Link>
@@ -89,6 +89,15 @@ const Navbar: React.FC = () => {
               }`}
             >
               Tarifs
+            </Link>
+            <Link
+              href="/mission"
+              className={`text-sm font-medium transition-colors hover:text-orange-500 flex items-center ${
+                pathname === "/missions" ? "text-orange-500" : "text-gray-600"
+              }`}
+            >
+              <Briefcase className="w-4 h-4 inline mr-1" />
+              Nos missions
             </Link>
             <Link
               href="/search"

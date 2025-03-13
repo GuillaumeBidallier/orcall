@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import {
   Star,
@@ -11,15 +11,19 @@ import {
   Briefcase,
   MessageCircle,
   FileImage,
-  X,
   User,
-  Facebook,
-  Instagram,
-  Linkedin,
   Globe,
   Flag,
   Eye,
 } from "lucide-react";
+
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedinIn,
+  FaXTwitter,
+} from "react-icons/fa6";
+
 import { trades } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { BACKEND_URL } from "@/lib/api";
@@ -27,6 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -37,7 +42,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import RatingDialog from "@/components/RatingDialog";
-import { formatBlurredPhone } from "@/lib/utils/formatters";
+import { formatBlurredPhone } from "@/lib/utils/formatBlurredPhone";
 import { isEntreprise } from "@/lib/utils";
 
 // ----- Interfaces -----
@@ -75,6 +80,7 @@ interface UserProfile {
   companyCity?: string;
   companyZipCode?: string;
   companyCountry?: string;
+  companyStatus?: string;
   siret: string;
   createdAt: string;
   banner?: string;
@@ -121,11 +127,8 @@ const ProfilPage: React.FC = () => {
   ]);
   const [comment, setComment] = useState("");
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
-  // Pour la boîte de dialogue d'évaluation
   const [isRatingDialogOpen, setIsRatingDialogOpen] = useState(false);
-  // Pour vérifier si l'utilisateur connecté a déjà noté ce profil
   const [hasRated, setHasRated] = useState(false);
-  // Pour le floutage du numéro et de l'email
   const [visiblePhones, setVisiblePhones] = useState<Record<string, boolean>>(
     {},
   );
@@ -143,7 +146,7 @@ const ProfilPage: React.FC = () => {
   };
 
   // ----- Récupération du profil utilisateur (avec reviews) -----
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const storedToken = localStorage.getItem("token");
       const res = await fetch(`${BACKEND_URL}/api/users/${id}`, {
@@ -151,7 +154,7 @@ const ProfilPage: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(
+        new Error(
           data.message || "Erreur lors de la récupération de l'utilisateur",
         );
       }
@@ -166,34 +169,35 @@ const ProfilPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, toast]);
+  //           ^^^
+  // On inclut ici toutes les dépendances dont "fetchUser" a besoin.
+  // (Si vous utilisez authToken à l’intérieur, ajoutez-le aussi.)
 
+  // 2) On appelle "fetchUser" dans un useEffect dont la dépendance est "fetchUser"
   useEffect(() => {
-    fetchUser();
-  }, [id]);
+    fetchUser().then((r) => r);
+  }, [fetchUser]);
 
   // Vérification si l'utilisateur a déjà noté ce profil
-  const checkIfRated = async () => {
-    if (!authUser || !user) return;
-    try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/reviews/hasRated?userId=${user.id}&authorId=${authUser.id}`,
-        { headers: { Authorization: `Bearer ${authToken}` } },
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setHasRated(data.hasRated);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la vérification de l'avis :", error);
-    }
-  };
-
   useEffect(() => {
-    if (user && authUser) {
-      checkIfRated();
-    }
-  }, [user, authUser]);
+    if (!user || !authUser) return;
+
+    (async () => {
+      try {
+        const res = await fetch(
+          `${BACKEND_URL}/api/reviews/hasRated?userId=${user.id}&authorId=${authUser.id}`,
+          { headers: { Authorization: `Bearer ${authToken}` } },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setHasRated(data.hasRated);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification de l'avis :", error);
+      }
+    })();
+  }, [user, authUser, authToken]);
 
   // ----- Fonctions de notation multi-critères -----
   const updateCriteriaRating = (criteriaId: string, value: number) => {
@@ -244,7 +248,7 @@ const ProfilPage: React.FC = () => {
         body: JSON.stringify(ratingData),
       });
       if (!response.ok) {
-        throw new Error("Erreur lors de la soumission de l'évaluation");
+        new Error("Erreur lors de la soumission de l'évaluation");
       }
       toast({
         title: "Évaluation envoyée",
@@ -253,7 +257,7 @@ const ProfilPage: React.FC = () => {
       setRatingCriteria(ratingCriteria.map((c) => ({ ...c, value: 0 })));
       setComment("");
       setIsRatingDialogOpen(false);
-      fetchUser();
+      fetchUser().then((r) => r);
     } catch (error) {
       console.error("Erreur lors de la soumission de l'évaluation:", error);
       toast({
@@ -283,7 +287,7 @@ const ProfilPage: React.FC = () => {
     );
   }
 
-  // Utilisation de isEntreprise pour déterminer si le profil est une entreprise
+  // Utilisation d'isEntreprise pour déterminer si le profil est une entreprise
   const isEnt = isEntreprise(user.userType);
   const tradeName = trades.find((t) => t.id === user.trade)?.name || user.trade;
 
@@ -292,14 +296,15 @@ const ProfilPage: React.FC = () => {
       {/* Bannière */}
       <div className="relative mb-8">
         <div className="h-64 w-full rounded-xl overflow-hidden">
-          <img
+          <Image
             src={
               user.banner
                 ? user.banner
                 : "https://via.placeholder.com/1200x400?text=Bannière"
             }
             alt="Bannière"
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         </div>
         <div className="absolute -bottom-16 left-8 flex items-end">
@@ -515,10 +520,12 @@ const ProfilPage: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {user.images?.map((image, index) => (
                       <div key={index} className="relative group">
-                        <img
+                        <Image
                           src={image.url}
                           alt={`Réalisation ${index + 1}`}
-                          className="w-full h-48 object-cover rounded-lg"
+                          width={400}
+                          height={192}
+                          className="object-cover rounded-lg w-full"
                         />
                       </div>
                     ))}
@@ -607,7 +614,7 @@ const ProfilPage: React.FC = () => {
                       ))
                     ) : (
                       <p className="text-gray-700">
-                        Aucun avis disponible pour l'instant.
+                        Aucun avis disponible pour l&#39;instant.
                       </p>
                     )}
                   </div>
@@ -633,7 +640,7 @@ const ProfilPage: React.FC = () => {
         {/* Sidebar complémentaire */}
         <div className="md:col-span-1">
           {isEnt ? (
-            // Pour un profil entreprise, on affiche les informations personnelles de l'utilisateur
+            // Pour un profil d'entreprise, on affiche les informations personnelles de l'utilisateur
             <Card className="mb-6 relative">
               <CardHeader className="relative">
                 <CardTitle>Informations personnelles</CardTitle>
@@ -698,7 +705,7 @@ const ProfilPage: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Facebook className="w-6 h-6 text-blue-600" />
+                      <FaFacebookF className="w-6 h-6 text-blue-600" />
                     </a>
                   )}
                   {user.instagramUrl && (
@@ -707,7 +714,7 @@ const ProfilPage: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Instagram className="w-6 h-6 text-pink-500" />
+                      <FaInstagram className="w-6 h-6 text-pink-500" />
                     </a>
                   )}
                   {user.linkedinUrl && (
@@ -716,7 +723,7 @@ const ProfilPage: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Linkedin className="w-6 h-6 text-blue-700" />
+                      <FaLinkedinIn className="w-6 h-6 text-blue-700" />
                     </a>
                   )}
                   {user.websiteUrl && (
@@ -816,7 +823,7 @@ const ProfilPage: React.FC = () => {
                         {user.mobile ? (
                           <Star className="w-5 h-5 text-green-500 mr-2" />
                         ) : (
-                          <X className="w-5 h-5 text-red-500 mr-2" />
+                          <FaXTwitter className="w-6 h-6 text-red-500 mr-2" />
                         )}
                         <span>Mobilité</span>
                       </div>

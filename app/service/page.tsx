@@ -14,9 +14,6 @@ import {
   Ruler,
   Grid,
   ArrowRight,
-  Star,
-  Clock,
-  Shield,
 } from "lucide-react";
 
 export default function ServicesPage() {
@@ -67,27 +64,6 @@ export default function ServicesPage() {
       description: "Pose de carrelage, faïence, revêtements de sols et murs.",
       color: "bg-teal-50",
       borderColor: "border-teal-200",
-    },
-  ];
-
-  const benefits = [
-    {
-      icon: <Star className="w-6 h-6 text-orange-500" />,
-      title: "Professionnels qualifiés",
-      description:
-        "Toutes nos entreprises sont sélectionnés pour leur expertise et leur savoir-faire.",
-    },
-    {
-      icon: <Clock className="w-6 h-6 text-orange-500" />,
-      title: "Disponibilité rapide",
-      description:
-        "Trouvez un professionnel disponible en quelques clics pour vos projets urgents.",
-    },
-    {
-      icon: <Shield className="w-6 h-6 text-orange-500" />,
-      title: "Travail garanti",
-      description:
-        "Tous les travaux réalisés par nos entreprises sont garantis pour votre tranquillité.",
     },
   ];
 
@@ -180,7 +156,7 @@ export default function ServicesPage() {
               Comment ça marche ?
             </h2>
             <p className="text-xl text-gray-600">
-              Trouver un professionnel n'a jamais été aussi simple
+              Trouver un professionnel n&#39;a jamais été aussi simple
             </p>
           </div>
 

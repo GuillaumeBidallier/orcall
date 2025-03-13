@@ -5,7 +5,7 @@ import {
   useContext,
   useState,
   useEffect,
-  ReactNode,
+  ReactNode, useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
 import { BACKEND_URL } from "@/lib/api";
@@ -17,6 +17,7 @@ interface AuthContextType {
   logout: () => void;
   refreshUser: () => void;
 }
+
 
 const AuthContext = createContext<AuthContextType>({
   token: null,
@@ -31,8 +32,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any | null>(null);
   const router = useRouter();
 
-  // Fonction pour récupérer les informations réelles de l'utilisateur depuis le backend
-  const refreshUser = async () => {
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/login");
+  }, [router]);
+
+  const refreshUser = useCallback(async () => {
     if (token && user?.id) {
       try {
         const res = await fetch(`${BACKEND_URL}/api/users/${user.id}`, {
@@ -48,18 +56,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem("user", JSON.stringify(data.user));
         } else {
           console.error(
-            "Erreur lors de la récupération de l'utilisateur",
-            data.message,
+              "Erreur lors de la récupération de l'utilisateur",
+              data.message,
           );
         }
       } catch (error) {
         console.error(
-          "Erreur lors du rafraîchissement des données utilisateur",
-          error,
+            "Erreur lors du rafraîchissement des données utilisateur",
+            error,
         );
       }
     }
-  };
+  }, [token, user?.id, logout]);
+
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -74,10 +83,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Rafraîchir les données utilisateur dès que le token et l'ID sont disponibles
+// Rafraîchir les données utilisateur dès que refreshUser change (dépendances internes incluses)
   useEffect(() => {
     refreshUser().then((r) => r);
-  }, [token, user?.id]);
+  }, [refreshUser]);
 
   const login = (newToken: string, newUser: any) => {
     setToken(newToken);
@@ -87,13 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/");
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/login");
-  };
+
 
   return (
     <AuthContext.Provider value={{ token, user, login, logout, refreshUser }}>

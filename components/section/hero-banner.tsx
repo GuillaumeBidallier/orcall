@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Building } from "lucide-react";
+import React from "react";
 
 interface HeroBannerProps {
   title: string;
@@ -73,7 +74,7 @@ export function HeroBanner({
             </div>
           </div>
 
-          {/* Formulaire de recherche en desktop - juste en dessous des boutons */}
+          {/* Formulaire de recherche en desktop — juste en dessous des boutons */}
           {searchForm && (
             <div className="hidden lg:block w-full mt-12">{searchForm}</div>
           )}

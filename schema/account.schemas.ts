@@ -54,15 +54,12 @@ export const passwordFormSchema = z
 
 // Schéma pour les informations d'entreprise
 export const enterpriseFormSchema = z.object({
-  companyName: z
-    .string()
-    .min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
-  companyAddress: z
-    .string()
-    .min(5, "L'adresse de l'entreprise doit contenir au moins 5 caractères"),
-  siret: z
-    .string()
-    .regex(/^\d{14}$/, "Le numéro SIRET doit contenir 14 chiffres"),
+  companyName: z.string().min(1, "Le nom de l'entreprise est requis"),
+  companyAddress: z.string().min(1, "L'adresse est requise"),
+  siret: z.string().min(9, "Le SIRET est requis"),
+  companyCity: z.string().min(1, "La ville est requise"),
+  companyZipCode: z.string().min(4, "Le code postal est requis"),
+  companyPhone: z.string().min(8, "Le numéro de téléphone est requis"),
 });
 
 // Schéma pour les réseaux sociaux
