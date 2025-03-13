@@ -225,94 +225,81 @@ export default function InscriptionPage() {
     },
   });
 
-  const onEntrepriseSubmit: SubmitHandler<EntrepriseFormInputs> = async (
-    data,
-  ) => {
-    setIsSubmitting(true);
-    try {
-      const response = await registerUser(data);
-      if (!response.ok) {
-        const errorData = await response.json();
-        new Error(errorData.message || "Erreur lors de l'inscription");
-      }
-      setIsSuccess(true);
-      toast({
-        title: "Inscription réussie !",
-        description: "Votre compte a été créé avec succès.",
-      });
-    } catch (error: any) {
-      console.error("Erreur lors de l'inscription :", error);
-      toast({
-        title: "Erreur d'inscription",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de l'inscription",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const handleFormSubmit = async (
+        data: EntrepriseFormInputs | ProfessionnelFormInputs,
+    ) => {
+        setIsSubmitting(true);
+        try {
+            const response = await registerUser(data);
+            if (!response.ok) {
+                const errorData = await response.json();
+                new Error(errorData.message || "Erreur lors de l'inscription");
+            }
+            setIsSuccess(true);
+            toast({
+                title: "Inscription réussie !",
+                description: "Votre compte a été créé avec succès.",
+            });
+        } catch (error: any) {
+            console.error("Erreur lors de l'inscription :", error);
+            toast({
+                title: "Erreur d'inscription",
+                description:
+                    error instanceof Error ? error.message : "Erreur lors de l'inscription",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-  const onProfessionnelSubmit: SubmitHandler<ProfessionnelFormInputs> = async (
-    data,
-  ) => {
-    setIsSubmitting(true);
-    try {
-      const response = await registerUser(data);
-      if (!response.ok) {
-        const errorData = await response.json();
-        new Error(errorData.message || "Erreur lors de l'inscription");
-      }
-      setIsSuccess(true);
-      toast({
-        title: "Inscription réussie !",
-        description: "Votre compte a été créé avec succès.",
-      });
-    } catch (error: any) {
-      console.error("Erreur lors de l'inscription :", error);
-      toast({
-        title: "Erreur d'inscription",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de l'inscription",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const onEntrepriseSubmit: SubmitHandler<EntrepriseFormInputs> = handleFormSubmit;
+    const onProfessionnelSubmit: SubmitHandler<ProfessionnelFormInputs> = handleFormSubmit;
 
   // Navigation entre étapes
-  const nextStep = async () => {
-    const form =
-      activeTab === "entreprise" ? entrepriseForm : professionnelForm;
-    const currentStepId = currentSteps[currentStep].id;
-    let valid = true;
-    if (currentStepId === "metier") {
-      valid = await form.trigger("trade");
-    } else if (currentStepId === "personnel") {
-      valid = await form.trigger(["firstName", "lastName", "phone"]);
-    } else if (currentStepId === "adresse") {
-      valid = await form.trigger([
-        "address",
-        "city",
-        "zipCode",
-        "department",
-        "country",
-      ]);
-    } else if (currentStepId === "entreprise") {
-      valid = await form.trigger(["companyName", "companyAddress", "siret"]);
-    } else if (currentStepId === "compte") {
-      valid = await form.trigger(["email", "password", "confirmPassword"]);
-    }
-    if (valid) {
-      setCurrentStep((prev) => Math.min(prev + 1, currentSteps.length - 1));
-      if (isMobile) window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+    const nextStep = async () => {
+        if (activeTab === "entreprise") {
+            const currentStepId = steps.entreprise[currentStep].id;
+            let valid = true;
+
+            if (currentStepId === "metier") {
+                valid = await entrepriseForm.trigger("trade");
+            } else if (currentStepId === "personnel") {
+                valid = await entrepriseForm.trigger(["firstName", "lastName", "phone"]);
+            } else if (currentStepId === "adresse") {
+                valid = await entrepriseForm.trigger(["address", "city", "zipCode", "department", "country"]);
+            } else if (currentStepId === "entreprise") {
+                valid = await entrepriseForm.trigger(["companyName", "companyAddress", "siret"]);
+            } else if (currentStepId === "compte") {
+                valid = await entrepriseForm.trigger(["email", "password", "confirmPassword"]);
+            }
+
+            if (valid) {
+                setCurrentStep((prev) => Math.min(prev + 1, steps.entreprise.length - 1));
+                if (isMobile) window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        } else if (activeTab === "professionnel") {
+            const currentStepId = steps.professionnel[currentStep].id;
+            let valid = true;
+
+            if (currentStepId === "metier") {
+                valid = await professionnelForm.trigger("trade");
+            } else if (currentStepId === "personnel") {
+                valid = await professionnelForm.trigger(["firstName", "lastName", "phone", "siret"]);
+            } else if (currentStepId === "adresse") {
+                valid = await professionnelForm.trigger(["address", "city", "zipCode", "department", "country"]);
+            } else if (currentStepId === "compte") {
+                valid = await professionnelForm.trigger(["email", "password", "confirmPassword"]);
+            }
+
+            if (valid) {
+                setCurrentStep((prev) => Math.min(prev + 1, steps.professionnel.length - 1));
+                if (isMobile) window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+    };
+
+
 
   const prevStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
@@ -896,11 +883,10 @@ export default function InscriptionPage() {
                 ))
               )}
             </div>
-            <Progress
-              value={progress}
-              className="h-2 bg-gray-200"
-              indicatorClassName="bg-orange-500"
-            />
+              <Progress
+                  value={progress}
+                  className="h-2 bg-gray-200 [&>div]:bg-orange-500"
+              />
           </div>
 
           {/* Formulaire Entreprise */}

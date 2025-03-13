@@ -1,7 +1,7 @@
 "use client";
 
 // Importe React et les hooks nécessaires
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 // Importe les hooks de navigation Next.js
 import { useRouter, useSearchParams } from "next/navigation";
 // Importe les composants Next.js et les composants UI
@@ -25,33 +25,33 @@ import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Star,
-  MapPin,
-  Phone,
-  Filter,
-  Search,
-  CheckCircle,
-  X,
-  MessageCircle,
   ArrowRight,
+  CheckCircle,
   Eye,
+  Filter,
   Lock,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Search,
+  Star,
   UserPlus,
+  X,
 } from "lucide-react";
-import { trades, departments } from "@/lib/data";
+import { departments, trades } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { BACKEND_URL } from "@/lib/api";
 import Pagination from "@/components/pagination";
@@ -86,6 +86,7 @@ interface Prestataire {
   avatar: string;
   images: { url: string }[];
   phone: string;
+  banner: string;
 }
 
 // Interface pour les filtres actifs
@@ -108,7 +109,7 @@ export interface RatingCriteria {
 }
 
 export default function RecherchePage() {
-  // Récupère les paramètres de recherche et initialise les hooks
+  // Récupère les paramètres de recherche et initialise-les hooks
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { token, user: authUser } = useAuth();
@@ -366,14 +367,27 @@ export default function RecherchePage() {
 
   // Supprime un filtre actif
   const removeFilter = (key: keyof ActiveFilters) => {
-    const newFilters = { ...activeFilters };
-    if (typeof newFilters[key] === "boolean") {
-      newFilters[key] = false as any;
-    } else if (typeof newFilters[key] === "number") {
-      newFilters[key] = 0 as any;
-    } else {
-      newFilters[key] = "" as any;
+    const newFilters: ActiveFilters = { ...activeFilters };
+
+    switch (key) {
+      case "availability":
+      case "mobility":
+      case "shortMissions":
+      case "longMissions":
+        newFilters[key] = false;
+        break;
+      case "minRating":
+        newFilters[key] = 0;
+        break;
+      case "trade":
+      case "department":
+      case "city":
+        newFilters[key] = "";
+        break;
+      default:
+        throw new Error(`Unhandled filter key: ${key}`);
     }
+
     setActiveFilters(newFilters);
     countActiveFilters(newFilters);
     applyFilters(prestataires, newFilters);
@@ -791,7 +805,7 @@ export default function RecherchePage() {
                     }
                   />
                   <Label htmlFor="shortMissions" className="cursor-pointer">
-                    Missions courtes (moins d'une semaine)
+                    Missions courtes (moins d&#39;une semaine)
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -803,7 +817,7 @@ export default function RecherchePage() {
                     }
                   />
                   <Label htmlFor="longMissions" className="cursor-pointer">
-                    Missions longues (plus d'une semaine)
+                    Missions longues (plus d&#39;une semaine)
                   </Label>
                 </div>
               </div>
@@ -914,7 +928,7 @@ export default function RecherchePage() {
                               onClick={() => setIsSignupDialogOpen(true)}
                             >
                               <UserPlus className="w-4 h-4 mr-2" />
-                              S'inscrire gratuitement
+                              S&#39;inscrire gratuitement
                             </Button>
                           </div>
                         )}
@@ -1106,7 +1120,7 @@ export default function RecherchePage() {
 
             <div className="bg-gray-50 p-4 rounded-lg mb-4">
               <h4 className="font-semibold mb-2">
-                Avantages de l'inscription :
+                Avantages de l&#39;inscription :
               </h4>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start">
@@ -1137,7 +1151,7 @@ export default function RecherchePage() {
                 className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
-                S'inscrire gratuitement
+                S&#39;inscrire gratuitement
               </Button>
             </DialogFooter>
           </DialogContent>

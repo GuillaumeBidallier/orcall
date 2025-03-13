@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState, useEffect, useCallback} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import {
   Star,
@@ -31,7 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image"
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -146,7 +146,7 @@ const ProfilPage: React.FC = () => {
   };
 
   // ----- Récupération du profil utilisateur (avec reviews) -----
-  const fetchUser =useCallback (async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const storedToken = localStorage.getItem("token");
       const res = await fetch(`${BACKEND_URL}/api/users/${id}`, {
@@ -176,7 +176,7 @@ const ProfilPage: React.FC = () => {
 
   // 2) On appelle "fetchUser" dans un useEffect dont la dépendance est "fetchUser"
   useEffect(() => {
-    fetchUser().then(r => r);
+    fetchUser().then((r) => r);
   }, [fetchUser]);
 
   // Vérification si l'utilisateur a déjà noté ce profil
@@ -186,8 +186,8 @@ const ProfilPage: React.FC = () => {
     (async () => {
       try {
         const res = await fetch(
-            `${BACKEND_URL}/api/reviews/hasRated?userId=${user.id}&authorId=${authUser.id}`,
-            { headers: { Authorization: `Bearer ${authToken}` } }
+          `${BACKEND_URL}/api/reviews/hasRated?userId=${user.id}&authorId=${authUser.id}`,
+          { headers: { Authorization: `Bearer ${authToken}` } },
         );
         if (res.ok) {
           const data = await res.json();
@@ -198,7 +198,6 @@ const ProfilPage: React.FC = () => {
       }
     })();
   }, [user, authUser, authToken]);
-
 
   // ----- Fonctions de notation multi-critères -----
   const updateCriteriaRating = (criteriaId: string, value: number) => {
@@ -258,7 +257,7 @@ const ProfilPage: React.FC = () => {
       setRatingCriteria(ratingCriteria.map((c) => ({ ...c, value: 0 })));
       setComment("");
       setIsRatingDialogOpen(false);
-      fetchUser().then( r => r);
+      fetchUser().then((r) => r);
     } catch (error) {
       console.error("Erreur lors de la soumission de l'évaluation:", error);
       toast({
@@ -298,14 +297,14 @@ const ProfilPage: React.FC = () => {
       <div className="relative mb-8">
         <div className="h-64 w-full rounded-xl overflow-hidden">
           <Image
-              src={
-                user.banner
-                    ? user.banner
-                    : "https://via.placeholder.com/1200x400?text=Bannière"
-              }
-              alt="Bannière"
-              fill
-              className="object-cover"
+            src={
+              user.banner
+                ? user.banner
+                : "https://via.placeholder.com/1200x400?text=Bannière"
+            }
+            alt="Bannière"
+            fill
+            className="object-cover"
           />
         </div>
         <div className="absolute -bottom-16 left-8 flex items-end">
@@ -522,11 +521,11 @@ const ProfilPage: React.FC = () => {
                     {user.images?.map((image, index) => (
                       <div key={index} className="relative group">
                         <Image
-                            src={image.url}
-                            alt={`Réalisation ${index + 1}`}
-                            width={400}
-                            height={192}
-                            className="object-cover rounded-lg w-full"
+                          src={image.url}
+                          alt={`Réalisation ${index + 1}`}
+                          width={400}
+                          height={192}
+                          className="object-cover rounded-lg w-full"
                         />
                       </div>
                     ))}

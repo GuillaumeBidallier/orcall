@@ -147,8 +147,8 @@ export default function MissionDetailPage() {
   // sinon on prend l'avatar s'il existe, etc.
   let creatorLogo = "";
   if (
-      mission.postedByUser?.userType === "Entreprise" &&
-      mission.postedByUser.companyLogo
+    mission.postedByUser?.userType === "Entreprise" &&
+    mission.postedByUser.companyLogo
   ) {
     creatorLogo = mission.postedByUser.companyLogo;
   } else if (mission.postedByUser?.avatar) {
@@ -253,234 +253,237 @@ export default function MissionDetailPage() {
   // Rendu JSX
   // =============================
   return (
-      <div className="container mx-auto py-6">
-        {/* Barre du haut : bouton "Retour" + actions */}
-        <div className="flex items-center justify-between mb-4">
-          {/* Bouton pour revenir à la page précédente */}
-          <Button variant="outline" onClick={() => router.back()}>
-            Retour
-          </Button>
+    <div className="container mx-auto py-6">
+      {/* Barre du haut : bouton "Retour" + actions */}
+      <div className="flex items-center justify-between mb-4">
+        {/* Bouton pour revenir à la page précédente */}
+        <Button variant="outline" onClick={() => router.back()}>
+          Retour
+        </Button>
 
-          {/* Section des boutons d'action : Éditer, changer statut, postuler */}
-          <div className="flex items-center gap-3">
-            {/* Si c'est le propriétaire de la mission, on affiche les boutons d'édition/statut */}
-            {isOwner ? (
-                <>
-                  <Button
-                      className="bg-orange-500 hover:bg-orange-600"
-                      onClick={openEditDialog}
-                  >
-                    Éditer la mission
-                  </Button>
-                  <Button
-                      variant="outline"
-                      className="border-orange-400 text-orange-700 hover:bg-orange-100"
-                      onClick={() => handleChangeStatus("en attente")}
-                  >
-                    Passer en attente
-                  </Button>
-                  <Button
-                      variant="outline"
-                      className="border-orange-400 text-orange-700 hover:bg-orange-100"
-                      onClick={() => handleChangeStatus("terminée")}
-                  >
-                    Clore la mission
-                  </Button>
-                </>
-            ) : (
-                // Si ce n'est pas le propriétaire ET que la mission est ouverte, on propose de postuler
-                !isOwner &&
-                mission.status === "ouvert" && (
-                    <Button
-                        className="bg-orange-500 hover:bg-orange-600"
-                        onClick={handlePostuler}
-                    >
-                      Postuler
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                )
-            )}
-          </div>
+        {/* Section des boutons d'action : Éditer, changer statut, postuler */}
+        <div className="flex items-center gap-3">
+          {/* Si c'est le propriétaire de la mission, on affiche les boutons d'édition/statut */}
+          {isOwner ? (
+            <>
+              <Button
+                className="bg-orange-500 hover:bg-orange-600"
+                onClick={openEditDialog}
+              >
+                Éditer la mission
+              </Button>
+              <Button
+                variant="outline"
+                className="border-orange-400 text-orange-700 hover:bg-orange-100"
+                onClick={() => handleChangeStatus("en attente")}
+              >
+                Passer en attente
+              </Button>
+              <Button
+                variant="outline"
+                className="border-orange-400 text-orange-700 hover:bg-orange-100"
+                onClick={() => handleChangeStatus("terminée")}
+              >
+                Clore la mission
+              </Button>
+            </>
+          ) : (
+            // Si ce n'est pas le propriétaire ET que la mission est ouverte, on propose de postuler
+            !isOwner &&
+            mission.status === "ouvert" && (
+              <Button
+                className="bg-orange-500 hover:bg-orange-600"
+                onClick={handlePostuler}
+              >
+                Postuler
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            )
+          )}
         </div>
+      </div>
 
-        {/* Contenu principal de la mission */}
-        <div className="bg-white shadow rounded p-6">
-          {/* Première ligne : Logo/Avatar + Titre à gauche, nombre de candidats/statut à droite */}
-          <div className="flex items-start justify-between">
-            {/* Bloc : Logo/Avatar + Titre */}
-            <div className="flex items-center">
-              {/*
+      {/* Contenu principal de la mission */}
+      <div className="bg-white shadow rounded p-6">
+        {/* Première ligne : Logo/Avatar + Titre à gauche, nombre de candidats/statut à droite */}
+        <div className="flex items-start justify-between">
+          {/* Bloc : Logo/Avatar + Titre */}
+          <div className="flex items-center">
+            {/*
               Au lieu de <UserImage user={mission.postedByUser} size={48} />,
               on utilise "creatorLogo" pour afficher l'image si dispo, sinon un fallback.
             */}
-              {creatorLogo ? (
-                  // Si "creatorLogo" est non vide, on affiche l'image avec <Image />
-                  <Image
-                      src={creatorLogo}
-                      alt={
-                        mission.postedByUser
-                            ? `${mission.postedByUser.firstName} ${mission.postedByUser.lastName}`
-                            : "Avatar inconnu"
-                      }
-                      // Largeur et hauteur à 48 pour conserver un format carré
-                      width={48}
-                      height={48}
-                      // Pour le style, on peut utiliser className ou style directement.
-                      style={{
-                        objectFit: "cover",
-                        borderRadius: 8,
-                        marginRight: 8,
-                      }}
-                  />
-              ) : (
-                  // Sinon, on affiche un bloc vide ou un placeholder
-                  <div
-                      style={{
-                        width: 48,
-                        height: 48,
-                        backgroundColor: "#eee",
-                        borderRadius: 8,
-                        marginRight: 8,
-                      }}
-                  />
-              )}
-
-              {/* Titre de la mission */}
-              <h1 className="text-2xl font-bold">{mission.title}</h1>
-            </div>
-
-            {/* Nombre de candidats + Statut de la mission */}
-            <div className="text-sm text-gray-600">
-              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                {nbCandidats} candidat{nbCandidats > 1 ? "s" : ""}
-              </Badge>{" "}
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                {mission.status}
-              </Badge>
-            </div>
-          </div>
-
-          {/* Information sur l'auteur de la mission (Entreprise ou Utilisateur) */}
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            {mission.postedByUser?.userType === "Entreprise" ? (
-                <span>
-              Publié par Entreprise : {mission.postedByUser.firstName}
-            </span>
+            {creatorLogo ? (
+              // Si "creatorLogo" est non vide, on affiche l'image avec <Image />
+              <Image
+                src={creatorLogo}
+                alt={
+                  mission.postedByUser
+                    ? `${mission.postedByUser.firstName} ${mission.postedByUser.lastName}`
+                    : "Avatar inconnu"
+                }
+                // Largeur et hauteur à 48 pour conserver un format carré
+                width={48}
+                height={48}
+                // Pour le style, on peut utiliser className ou style directement.
+                style={{
+                  objectFit: "cover",
+                  borderRadius: 8,
+                  marginRight: 8,
+                }}
+              />
             ) : (
-                <span>
-              Publié par :{" "}
-                  {mission.postedByUser
-                      ? `${mission.postedByUser.firstName} ${mission.postedByUser.lastName}`
-                      : "Utilisateur inconnu"}
-            </span>
+              // Sinon, on affiche un bloc vide ou un placeholder
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: "#eee",
+                  borderRadius: 8,
+                  marginRight: 8,
+                }}
+              />
             )}
+
+            {/* Titre de la mission */}
+            <h1 className="text-2xl font-bold">{mission.title}</h1>
           </div>
 
-          {/* Ligne d'infos : localisation, dates, tarif */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700 mt-2">
-            {/* Localisation */}
-            {mission.location && (
-                <span className="flex items-center">
-              <MapPin className="w-4 h-4 mr-1" />
-                  {mission.location}
-            </span>
-            )}
-
-            {/* Dates (début - fin) */}
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-1" />
-              <span>
-              {mission.startDate
-                  ? new Date(mission.startDate).toLocaleDateString()
-                  : "Début n/c"}{" "}
-                -{" "}
-                {mission.endDate
-                    ? new Date(mission.endDate).toLocaleDateString()
-                    : "Fin n/c"}
-            </span>
-            </div>
-
-            {/* Tarif (budget) */}
-            {(mission.budgetMin || mission.budgetMax) && (
-                <div className="flex items-center">
-                  <Euro className="w-4 h-4 mr-1" />
-                  <span>
-                {mission.budgetType === "fixed"
-                    ? `${mission.budgetMin}€ - ${mission.budgetMax}€ (forfait)`
-                    : mission.budgetType === "hourly"
-                        ? `${mission.budgetMin}€/h - ${mission.budgetMax}€/h`
-                        : "Budget n/c"}
-              </span>
-                </div>
-            )}
-          </div>
-
-          {/* Description de la mission */}
-          <p className="text-gray-600 whitespace-pre-wrap mt-4">
-            {mission.description}
-          </p>
-
-          {/* Affiche un badge indiquant si la mission est courte ou longue */}
-          <div className="mt-4">
-            {mission.durationType === "short" ? (
-                <Badge variant="outline" className="text-sm">
-                  Mission courte
-                </Badge>
-            ) : (
-                <Badge variant="outline" className="text-sm">
-                  Mission longue
-                </Badge>
-            )}
+          {/* Nombre de candidats + Statut de la mission */}
+          <div className="text-sm text-gray-600">
+            <Badge
+              variant="secondary"
+              className="bg-orange-100 text-orange-800"
+            >
+              {nbCandidats} candidat{nbCandidats > 1 ? "s" : ""}
+            </Badge>{" "}
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              {mission.status}
+            </Badge>
           </div>
         </div>
 
-        {/* Fenêtre (modal) pour éditer la mission */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              {/* Titre du modal */}
-              <DialogTitle>Éditer la mission</DialogTitle>
-              {/* Description brève du modal */}
-              <DialogDescription>
-                Modifiez les informations de votre annonce.
-              </DialogDescription>
-            </DialogHeader>
+        {/* Information sur l'auteur de la mission (Entreprise ou Utilisateur) */}
+        <div className="flex items-center text-sm text-gray-600 mb-2">
+          {mission.postedByUser?.userType === "Entreprise" ? (
+            <span>
+              Publié par Entreprise : {mission.postedByUser.firstName}
+            </span>
+          ) : (
+            <span>
+              Publié par :{" "}
+              {mission.postedByUser
+                ? `${mission.postedByUser.firstName} ${mission.postedByUser.lastName}`
+                : "Utilisateur inconnu"}
+            </span>
+          )}
+        </div>
 
-            {/* Contenu du formulaire d'édition */}
-            <div className="grid gap-2 py-4">
-              <label className="font-medium text-sm">Titre</label>
-              <input
-                  type="text"
-                  className="border px-2 py-1"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-              />
+        {/* Ligne d'infos : localisation, dates, tarif */}
+        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700 mt-2">
+          {/* Localisation */}
+          {mission.location && (
+            <span className="flex items-center">
+              <MapPin className="w-4 h-4 mr-1" />
+              {mission.location}
+            </span>
+          )}
 
-              <label className="font-medium text-sm mt-2">Description</label>
-              <textarea
-                  className="border px-2 py-1"
-                  rows={5}
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-              />
+          {/* Dates (début - fin) */}
+          <div className="flex items-center">
+            <Calendar className="w-4 h-4 mr-1" />
+            <span>
+              {mission.startDate
+                ? new Date(mission.startDate).toLocaleDateString()
+                : "Début n/c"}{" "}
+              -{" "}
+              {mission.endDate
+                ? new Date(mission.endDate).toLocaleDateString()
+                : "Fin n/c"}
+            </span>
+          </div>
+
+          {/* Tarif (budget) */}
+          {(mission.budgetMin || mission.budgetMax) && (
+            <div className="flex items-center">
+              <Euro className="w-4 h-4 mr-1" />
+              <span>
+                {mission.budgetType === "fixed"
+                  ? `${mission.budgetMin}€ - ${mission.budgetMax}€ (forfait)`
+                  : mission.budgetType === "hourly"
+                    ? `${mission.budgetMin}€/h - ${mission.budgetMax}€/h`
+                    : "Budget n/c"}
+              </span>
             </div>
+          )}
+        </div>
 
-            <DialogFooter>
-              {/* Bouton pour fermer la fenêtre sans enregistrer */}
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-                Annuler
-              </Button>
+        {/* Description de la mission */}
+        <p className="text-gray-600 whitespace-pre-wrap mt-4">
+          {mission.description}
+        </p>
 
-              {/* Bouton pour valider la mise à jour */}
-              <Button
-                  className="bg-orange-500 hover:bg-orange-600"
-                  onClick={handleUpdateMission}
-              >
-                Enregistrer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Affiche un badge indiquant si la mission est courte ou longue */}
+        <div className="mt-4">
+          {mission.durationType === "short" ? (
+            <Badge variant="outline" className="text-sm">
+              Mission courte
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-sm">
+              Mission longue
+            </Badge>
+          )}
+        </div>
       </div>
+
+      {/* Fenêtre (modal) pour éditer la mission */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            {/* Titre du modal */}
+            <DialogTitle>Éditer la mission</DialogTitle>
+            {/* Description brève du modal */}
+            <DialogDescription>
+              Modifiez les informations de votre annonce.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Contenu du formulaire d'édition */}
+          <div className="grid gap-2 py-4">
+            <label className="font-medium text-sm">Titre</label>
+            <input
+              type="text"
+              className="border px-2 py-1"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+            />
+
+            <label className="font-medium text-sm mt-2">Description</label>
+            <textarea
+              className="border px-2 py-1"
+              rows={5}
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+            />
+          </div>
+
+          <DialogFooter>
+            {/* Bouton pour fermer la fenêtre sans enregistrer */}
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Annuler
+            </Button>
+
+            {/* Bouton pour valider la mise à jour */}
+            <Button
+              className="bg-orange-500 hover:bg-orange-600"
+              onClick={handleUpdateMission}
+            >
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

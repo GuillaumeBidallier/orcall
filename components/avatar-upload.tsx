@@ -23,7 +23,7 @@ const AvatarUpload: React.FC = () => {
       });
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(
+         new Error(
           json.message || "Erreur lors du téléchargement de l'avatar",
         );
       }

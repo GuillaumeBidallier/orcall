@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, MapPin, Calendar, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FeatureCard } from "@/components/ui/feature-card";

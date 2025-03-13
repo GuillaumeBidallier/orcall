@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
   // État pour suivre l'erreur de chargement de l'image
   const [hasError, setHasError] = useState(false);
 
-  // Si une erreur survient, on affiche un div avec les initiales "OC"
+  // Si une erreur survient, on affiche un div avec les initiales "OC".
   if (hasError) {
     return (
       <div className="w-16 h-16 flex items-center justify-center bg-gray-200 text-xl font-bold">

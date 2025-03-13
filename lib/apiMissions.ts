@@ -106,8 +106,8 @@ export async function updateApplicationStatus(
 // Récupérer une mission (détails) par ID
 
 export async function fetchOneMission(
-    missionId: number,
-    token?: string | null,
+  missionId: number,
+  token?: string | null,
 ): Promise<any> {
   const res = await fetch(`${BACKEND_URL}/api/missions/${missionId}`, {
     headers: {

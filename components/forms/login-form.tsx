@@ -26,7 +26,7 @@ const LoginForm: React.FC = () => {
     try {
       const response = await loginUser({ email, password } as LoginData);
       if (!response.ok) {
-        throw new Error(response.message || "Erreur lors de la connexion");
+        new Error(response.message || "Erreur lors de la connexion");
       }
       // On suppose que l'API renvoie un token et un objet utilisateur
       login(response.token, response.user);

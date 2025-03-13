@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
-import { trades, departments } from "@/lib/data";
+import { departments } from "@/lib/data";
 
 export interface SearchCriteria {
   trade: string;
@@ -24,9 +24,16 @@ export interface SearchCriteria {
   mobility: boolean;
   shortMissions: boolean;
   longMissions: boolean;
+  region: string;
 }
 
-export function SearchForm() {
+export interface SearchFormProps {
+  trades: { id: string; name: string }[];
+  regions: string[];
+  onSearch: (criteria: SearchCriteria) => void;
+}
+
+export function SearchForm({ trades }: SearchFormProps) {
   const router = useRouter();
   const [selectedTrade, setSelectedTrade] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
