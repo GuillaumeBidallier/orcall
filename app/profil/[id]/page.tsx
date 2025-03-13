@@ -37,7 +37,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import RatingDialog from "@/components/RatingDialog";
-import { formatBlurredPhone } from "@/lib/utils/formatters";
+import { formatBlurredPhone } from "@/lib/utils/formatBlurredPhone";
 import { isEntreprise } from "@/lib/utils";
 
 // ----- Interfaces -----

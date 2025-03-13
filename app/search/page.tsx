@@ -57,7 +57,7 @@ import { BACKEND_URL } from "@/lib/api";
 import Pagination from "@/components/pagination";
 import { useAuth } from "@/context/auth-context";
 import RatingDialog from "@/components/RatingDialog";
-import { formatBlurredPhone } from "@/lib/utils/formatters";
+import { formatBlurredPhone } from "@/lib/utils/formatBlurredPhone";
 
 // Importe la fonction utilitaire pour vérifier si l'utilisateur est de type "entreprise"
 import { isEntreprise } from "@/lib/utils";
