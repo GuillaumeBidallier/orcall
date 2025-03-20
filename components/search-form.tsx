@@ -56,7 +56,7 @@ export function SearchForm({ trades }: SearchFormProps) {
     if (shortMissions) query.append("shortMissions", "true");
     if (longMissions) query.append("longMissions", "true");
 
-    // Redirige vers la page RecherchePage avec les filtres dans l'URL
+    // Redirige vers la page SearchPage avec les filtres dans l'URL
     router.push("/search?" + query.toString());
   };
 
