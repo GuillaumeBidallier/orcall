@@ -22,3 +22,8 @@ variable "container_image_url" {
   type        = string
   description = "Docker image URL for Cloud Run"
 }
+
+variable "dns_name" {
+  type        = string
+  description = "DNS name for the service"
+}

@@ -27,6 +27,7 @@ module "cloud_run" {
   service_name          = var.service_name
   container_image       = var.container_image_url
   service_account_email = module.cloud_run_sa.cloud_run_service_account_email
+  dns_name              = var.dns_name
   env = {
   }
 }

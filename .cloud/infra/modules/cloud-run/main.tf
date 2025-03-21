@@ -7,6 +7,7 @@ variable "container_image" {}
 variable "env" {
   type = map(string)
 }
+variable "dns_name" {}
 
 data "google_cloud_run_v2_service" "server" {
   project  = var.project_id
@@ -58,4 +59,22 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
   role     = "roles/run.invoker"
   member   = "allUsers"
   name     = google_cloud_run_v2_service.this.name
+}
+
+resource "google_cloud_run_domain_mapping" "front_domain_mapping" {
+  name     = var.dns_name
+  location = var.region
+  project  = var.project_id
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.this.name
+  }
+}
+
+output "domain_mapping_status" {
+  value = google_cloud_run_domain_mapping.front_domain_mapping.status
 }

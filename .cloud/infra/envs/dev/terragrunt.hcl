@@ -5,4 +5,5 @@ include {
 inputs = {
   environment_name    = "dev"
   container_image_url = get_env("CONTAINER_IMAGE_URL")
+  dns_name            = "orcall.fr"
 }
