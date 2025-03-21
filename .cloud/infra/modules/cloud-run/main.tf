@@ -78,3 +78,7 @@ resource "google_cloud_run_domain_mapping" "front_domain_mapping" {
 output "domain_mapping_status" {
   value = google_cloud_run_domain_mapping.front_domain_mapping.status
 }
+
+output "url" {
+  value = google_cloud_run_v2_service.this.uri
+}

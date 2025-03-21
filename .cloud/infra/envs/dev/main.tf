@@ -31,3 +31,7 @@ module "cloud_run" {
   env = {
   }
 }
+
+output "service_url" {
+  value = module.cloud_run.url
+}
